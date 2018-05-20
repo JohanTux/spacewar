@@ -2,16 +2,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
-import java.awt.font.TextAttribute;
-import java.text.*;
-import java.text.AttributedString.*;
-import java.util.Random;
+//import java.awt.font.TextAttribute;
+//import java.text.*;
+//import java.text.AttributedString.*;
+//import java.util.Random;
 
 public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
     java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
     int playfieldHeight =  screenSize.height - 75;
     int playfieldWidth  =  screenSize.width - 30;
-    Canvas gameSpace = new Canvas();                                // create playfield canvas
+    // create playfield canvas
+    Canvas gameSpace;                                
     Timer paintTimer;                                               // crate a paint paintTimer
     
     boolean ship0Exists = false, ship1Exists = false;               // show ships not there.
@@ -53,15 +54,16 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
     int player1Score = 0;
     int player2Score = 0;
     float x = 1;                                    // this will be a scaling factor when implemented
-    Integer Wplayer1Score = new Integer(player1Score);
-    Integer Wplayer2Score = new Integer(player2Score);
+    Integer Wplayer1Score = player1Score;
+    Integer Wplayer2Score = player2Score;
     int ship0TorpCount = 20;
     int ship1TorpCount = 20;
     /** Creates new form SpaceWarIII */
     public SpaceWarIII() {
+        this.gameSpace = new Canvas();
         gameControl game = new gameControl();
         this.setTitle("SpaceWar!");
-
+        
         // wrapping them in an object for display purposes
 
         
@@ -96,15 +98,17 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         
         
         getContentPane().add(gameSpace, BorderLayout.CENTER);   // add canvas to Jframe
+        gameSpace.requestFocusInWindow();
         gameSpace.setVisible(true);                             // make canvas visible
         gameSpace.setActiveShip(player[0], player[1]);
-
+        if(!gameSpace.hasFocus()) {player1Score+=20;} else {player2Score++;}
         
     }// end SpaceWarIII() (constructor)
     
     
     class gameControl extends Thread{
         
+        @Override
         public void run(){
             
              
@@ -122,15 +126,22 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
             player[0].setVelY(-2.25);
             
             
+            gameSpace.setFocusable(true);
+            gameSpace.isFocusTraversable();
+           
+            
             
             
             addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyPressed(java.awt.event.KeyEvent evt) {
                     formKeyPressed(evt);
                 }// end keyPressed();
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent evt){
                     formKeyReleased(evt);
                 }// end keyReleased();
+                @Override
                 public void keyTyped(java.awt.event.KeyEvent evt){
                     formKeyTyped(evt);
                 }// end keyTyped
@@ -151,19 +162,19 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         double yCoord1 = ship1.getPosY();           //player 1 current Y coord
         double direction = ship.getDirection();     //player 0 current direction in rads
         double direction1 = ship1.getDirection();   //player 1 current direction in rads
-        double pairXdiff = 100;                     // difference in X position between players (init to 100 for initial pass)
-        double pairYdiff = 100;                     // difference in Y position between players
-        double sunXdiff0 = 100;                     // X distance between player 0 and sun
-        double sunYdiff0 = 100;                     // Y distance between player 0 and sun
-        double sunXdiff1 = 100;                     // X distance between player 1 and sun
-        double sunYdiff1 = 100;                     // Y distance between player 1 and sun
+        double pairXdiff;                     // difference in X position between players (init to 100 for initial pass)
+        double pairYdiff;                     // difference in Y position between players
+        double sunXdiff0;                     // X distance between player 0 and sun
+        double sunYdiff0;                     // Y distance between player 0 and sun
+        double sunXdiff1;                     // X distance between player 1 and sun
+        double sunYdiff1;                     // Y distance between player 1 and sun
         double TorpXdif0 = 100;                     // X distance between player 0 and any torpedo
         double TorpYdif0 = 100;                     // Y distance between player 0 and any torpedo
         double TorpXdif1 = 100;                     // X distance between player 1 and any torpedo
         double TorpYdif1 = 100;                     // Y distance between player 1 and any torpedo
-        double pairDiff  = 100;                     // Total distance between players
-        double sunDist0  = 100;                     // Total distance between player 0 and sun
-        double sunDist1  = 100;                     // Total distance between player 1 and sun
+        double pairDiff ;                     // Total distance between players
+        double sunDist0 ;                     // Total distance between player 0 and sun
+        double sunDist1 ;                     // Total distance between player 1 and sun
         double torpDist0 = 100;                     // Minimum distance between player 0 and any torpedo
         double torpDist1 = 100;                     // Minimum distance between player 0 and any torpedo
           
@@ -189,7 +200,7 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
             int multiplier = bgStar[s].getIncMult();
             int currentBrightness = bgStar[s].getBrightness();
             
-            if( (int)Math.random() * 50 == 0){
+            if( (int) (Math.random() * 50) == 0){
                 switch(currentBrightness){
                     case 255: bgStar[s].setBrightness(254);
                     bgStar[s].setIncMult(-1);
@@ -505,11 +516,12 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         
       
       // update Score Wrappers to reflect scoring changes
-        Wplayer1Score = new Integer(player1Score);
-        Wplayer2Score = new Integer(player2Score);
+        Wplayer1Score = player1Score;
+        Wplayer2Score = player2Score;
         
     }// end update()
     
+    @Override
     public void actionPerformed(java.awt.event.ActionEvent actionEvent) {
         gameSpace.requestFocus();
         gameSpace.pt1 -= 1;
@@ -537,6 +549,7 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         buttonStartQuit = new javax.swing.JButton();
         
         addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
             }
@@ -544,15 +557,18 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         
         buttonStartQuit.setText("Start");
         buttonStartQuit.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonStartQuitActionPerformed(evt);
             }
         });
         
         buttonStartQuit.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyPressed(java.awt.event.KeyEvent evt) {
                     buttonKeyPressed(evt);
                 }// end keyPressed();
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent evt){
                     buttonKeyReleased(evt);
                 }// end keyReleased();
@@ -564,8 +580,9 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         getContentPane().add(buttonStartQuit, java.awt.BorderLayout.NORTH);
         
         pack();
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setSize(new java.awt.Dimension(screenSize.width, screenSize.height));
+        java.awt.Dimension displaySize;
+        displaySize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(new java.awt.Dimension(displaySize.width, displaySize.height));
         //setLocation((screenSize.width-playfieldWidth + 10)/2,(screenSize.height-playfieldHeight - 75)/2);
     }
     
@@ -573,43 +590,43 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
      *  END FORTE GENERATED CODE
      *********************************************/
     private void buttonKeyPressed(java.awt.event.KeyEvent evt) {
-        if(evt.getKeyCode() == evt.VK_CONTROL) ctrlKey = true;
-        if(evt.getKeyCode() == evt.VK_Z) {
+        if(evt.getKeyCode() == KeyEvent.VK_CONTROL) ctrlKey = true;
+        if(evt.getKeyCode() == KeyEvent.VK_Z) {
             zKey = true;
             this.startAnimation();
             new gameControl().start();                                 //start the game
         }
-        if(evt.getKeyCode() == evt.VK_Q){
+        if(evt.getKeyCode() == KeyEvent.VK_Q){
             qKey = true;
             if( ctrlKey ) System.exit(0);
         }
         
     }// end buttonKeyPressed()
     private void buttonKeyReleased(java.awt.event.KeyEvent evt) {
-        if(evt.getKeyCode() == evt.VK_CONTROL) ctrlKey = false;
-        if(evt.getKeyCode() == evt.VK_Z) zKey = false;
+        if(evt.getKeyCode() == KeyEvent.VK_CONTROL) ctrlKey = false;
+        if(evt.getKeyCode() == KeyEvent.VK_Z) zKey = false;
         
         
     }// end buttonKeyReleased()
     
     
     private void formKeyPressed(java.awt.event.KeyEvent evt) {
-        if(evt.getKeyCode() == evt.VK_A) ship0RL = true;
-        if(evt.getKeyCode() == evt.VK_D) ship0RR = true;
-        if(evt.getKeyCode() == evt.VK_J) ship1RL = true;
-        if(evt.getKeyCode() == evt.VK_L) ship1RR = true;
-        if(evt.getKeyCode() == evt.VK_W) ship0Thr = true;
-        if(evt.getKeyCode() == evt.VK_I) ship1Thr = true;
-        if(evt.getKeyCode() == evt.VK_S) ship0Torp = true;
-        if(evt.getKeyCode() == evt.VK_K) ship1Torp = true;
-        if(evt.getKeyCode() == evt.VK_PLUS) x += .1;
-        if(evt.getKeyCode() == evt.VK_PLUS) x -= .1;
-        if(evt.getKeyCode() == evt.VK_CONTROL) ctrlKey = true;
-        if(evt.getKeyCode() == evt.VK_Z) {
+        if(evt.getKeyCode() == KeyEvent.VK_A) ship0RL = true;
+        if(evt.getKeyCode() == KeyEvent.VK_D) ship0RR = true;
+        if(evt.getKeyCode() == KeyEvent.VK_J) ship1RL = true;
+        if(evt.getKeyCode() == KeyEvent.VK_L) ship1RR = true;
+        if(evt.getKeyCode() == KeyEvent.VK_W) ship0Thr = true;
+        if(evt.getKeyCode() == KeyEvent.VK_I) ship1Thr = true;
+        if(evt.getKeyCode() == KeyEvent.VK_S) ship0Torp = true;
+        if(evt.getKeyCode() == KeyEvent.VK_K) ship1Torp = true;
+        if(evt.getKeyCode() == KeyEvent.VK_PLUS) x += .1;
+        if(evt.getKeyCode() == KeyEvent.VK_PLUS) x -= .1;
+        if(evt.getKeyCode() == KeyEvent.VK_CONTROL) ctrlKey = true;
+        if(evt.getKeyCode() == KeyEvent.VK_Z) {
             zKey = true;
             if( ctrlKey ) new gameControl().start();
         }
-        if(evt.getKeyCode() == evt.VK_Q){
+        if(evt.getKeyCode() == KeyEvent.VK_Q){
             qKey = true;
             if( ctrlKey ) System.exit(0);
         }
@@ -620,23 +637,26 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
     
     }
     private void formKeyReleased(java.awt.event.KeyEvent evt) {
-        if(evt.getKeyCode() == evt.VK_A) ship0RL = false;
-        if(evt.getKeyCode() == evt.VK_D) ship0RR = false;
-        if(evt.getKeyCode() == evt.VK_J) ship1RL = false;
-        if(evt.getKeyCode() == evt.VK_L) ship1RR = false;
-        if(evt.getKeyCode() == evt.VK_W) ship0Thr = false;
-        if(evt.getKeyCode() == evt.VK_I) ship1Thr = false;
-        if(evt.getKeyCode() == evt.VK_S) ship0Torp = false;
-        if(evt.getKeyCode() == evt.VK_K) ship1Torp = false;
-        if(evt.getKeyCode() == evt.VK_CONTROL) ctrlKey = false;
-        if(evt.getKeyCode() == evt.VK_Z) zKey = false;
-        if(evt.getKeyCode() == evt.VK_Q) qKey = false;
+        if(evt.getKeyCode() == KeyEvent.VK_A) {
+            ship0RL = false;
+            player1Score++;
+        }
+        if(evt.getKeyCode() == KeyEvent.VK_D) ship0RR = false;
+        if(evt.getKeyCode() == KeyEvent.VK_J) ship1RL = false;
+        if(evt.getKeyCode() == KeyEvent.VK_L) ship1RR = false;
+        if(evt.getKeyCode() == KeyEvent.VK_W) ship0Thr = false;
+        if(evt.getKeyCode() == KeyEvent.VK_I) ship1Thr = false;
+        if(evt.getKeyCode() == KeyEvent.VK_S) ship0Torp = false;
+        if(evt.getKeyCode() == KeyEvent.VK_K) ship1Torp = false;
+        if(evt.getKeyCode() == KeyEvent.VK_CONTROL) ctrlKey = false;
+        if(evt.getKeyCode() == KeyEvent.VK_Z) zKey = false;
+        if(evt.getKeyCode() == KeyEvent.VK_Q) qKey = false;
        
         
     }
     
     private void buttonStartQuitActionPerformed(java.awt.event.ActionEvent evt) {
-        if(buttonStartQuit.getText() == "Start"){
+        if("Start".equals(buttonStartQuit.getText())){
             
             this.startAnimation();
             
@@ -674,6 +694,7 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         // JPanels have issues with gaining focus unless you override the
         // following method: 
         
+        @Override
         public boolean isFocusTraversable(){
             return true;
         }
@@ -685,6 +706,7 @@ public class SpaceWarIII extends javax.swing.JFrame  implements ActionListener{
         }
         
         // overriding jPanel's paintComponent method
+        @Override
         public void paintComponent(Graphics g){
             if(pt1 < 0) pt1 = 100000;
             Color deepRed = new Color(180,26,26);
@@ -1045,6 +1067,7 @@ class ForegroundStar extends Star {
     public void setMass( double d ){
         mass = d;
     }
+    @Override
     public double getMass(){
         
         return mass;
